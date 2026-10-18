@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AstralPaws | Next-Gen Cloud & Infrastructure</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap" rel="stylesheet">
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #050b1a;
+            color: #e2e8f0;
+            overflow-x: hidden;
+            position: relative;
+        }
+        h1, h2, h3, .font-heading {
+            font-family: 'Outfit', sans-serif;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            top: -5%; left: -2%; width: 104%; height: 110%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(79, 70, 229, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(147, 51, 234, 0.15) 0%, transparent 40%),
+                url('https://www.transparenttextures.com/patterns/stardust.png');
+            z-index: -2;
+            pointer-events: none;
+            will-change: transform;
+            transform: translateY(calc(var(--scroll-y, 0) * 0.04px));
+        }
+        body::after {
+            content: "";
+            position: fixed;
+            top: -10%; left: -2%; width: 104%; height: 120%;
+            background: url('https://images.unsplash.com/photo-1464802686167-b939a6910659?q=80&w=2050&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.4;
+            z-index: -3;
+            filter: brightness(0.6);
+            will-change: transform;
+            transform: translateY(calc(var(--scroll-y, 0) * 0.12px));
+        }
+
+        .glass {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #818cf8 0%, #c084fc 50%, #f472b6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 8px rgba(129, 140, 248, 0.3));
+        }
+        
+        .handwriting {
+            font-family: 'Caveat', cursive;
+            font-size: 1.4em;
+            letter-spacing: 0;
+        }
+
+        .click-line {
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            width: 40px;
+            height: 4px;
+            border-radius: 2px;
+            will-change: transform, opacity;
+            transition: transform 0.7s cubic-bezier(0.2, 0.6, 0.3, 1), opacity 0.7s ease-out;
+        }
+
+        .shooting-star {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: #ff6b6b !important;
+            border-radius: 50%;
+            box-shadow: 0 0 20px 5px #ff6b6b, 0 0 40px 10px rgba(249, 115, 22, 0.5);
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0;
+            will-change: transform, opacity;
+        }
+        .shooting-star::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            right: 2px;
+            transform: translateY(-50%);
+            width: 200px;
+            height: 4px;
+            background: linear-gradient(to left, #ff6b6b 0%, #f97316 70%, rgba(249, 115, 22, 0) 100%);
+            border-radius: 100px;
+        }
+        @keyframes shoot {
+            0% { transform: rotate(var(--angle)) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: rotate(var(--angle)) translateX(1800px); opacity: 0; }
+        }
+
+        .service-card {
+            cursor: pointer;
+            transition: all 0.15s ease-out;
+            border-width: 2px !important;
+        }
+        
+        .service-card-active {
+            position: fixed !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: perspective(1000px) translate(-50%, -50%) scale(1.1);
+            z-index: 1000 !important;
+            width: 90% !important;
+            max-width: 600px !important;
+            cursor: default !important;
+            box-shadow: 0 0 100px rgba(0,0,0,0.8), 0 0 40px rgba(99, 102, 241, 0.3) !important;
+            transition: transform 0.1s ease-out, opacity 0.6s ease !important;
+        }
+
+        #focus-backdrop {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 11, 26, 0.95);
+            backdrop-filter: blur(12px);
+            z-index: 998;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        #focus-backdrop.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .grid-focus-mode .service-card:not(.service-card-active) {
+            opacity: 0;
+            transform: scale(0.8) translateY(20px);
+            pointer-events: none;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.2, 0.6, 0.3, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .cursor-star {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9990;
+            animation: starFade 0.8s ease-out forwards;
+        }
+        @keyframes starFade {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
+        }
+
+        .stat-card {
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.4);
+        }
+
+        .shattered-hide {
+            opacity: 0 !important;
+            pointer-events: none !important;
+            transition: opacity 0.2s ease !important;
+        }
+
+        .shard {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            border-radius: 2px;
+            will-change: transform, opacity;
+        }
+
+        .reappear {
+            animation: reappear-effect 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        @keyframes reappear-effect {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .shake-active {
+            animation: screen-shake 0.15s infinite;
+        }
+        @keyframes screen-shake {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(-8px, 4px); }
+            50% { transform: translate(8px, -4px); }
+            75% { transform: translate(-4px, -8px); }
+        }
+        .gravity-animate {
+            transition: transform 1.8s cubic-bezier(0.6, -0.28, 0.735, 0.045), opacity 1.5s ease-in !important;
+            will-change: transform, opacity;
+        }
+        .gravity-fell {
+            transform: translateY(150vh) rotate(var(--fall-rot)) !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+    </style>
+</head>
+<body class="text-slate-200 antialiased">
+
+    <header class="fixed w-full top-0 z-50 px-6 py-4">
+        <nav class="container mx-auto glass rounded-2xl px-6 py-3 flex justify-between items-center">
+            <div class="text-xl font-bold tracking-tight">
+                Astral<span class="text-indigo-500">Paws</span>
+            </div>
+            <div class="hidden md:flex space-x-8 text-sm font-medium text-slate-400">
+                <a href="#hizmetler" class="hover:text-white transition">Hizmetler</a>
+                <a href="#hakkimizda" class="hover:text-white transition">Hakkımızda</a>
+                <a href="#neden-biz" class="hover:text-white transition">Neden Biz?</a>
+                <a href="#nasil-calisiyoruz" class="hover:text-white transition">Süreç</a>
+                <a href="#sss" class="hover:text-white transition">SSS</a>
+                <a href="#iletisim" class="hover:text-white transition">İletişim</a>
+            </div>
+        </nav>
+    </header>
+
+    <div id="focus-backdrop"></div>
+
+    <header class="container mx-auto px-6 pt-48 pb-24 text-center animate-float">
+        <div class="inline-flex items-center space-x-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full px-4 py-1.5 mb-8">
+            <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+            </span>
+            <span class="text-xs font-bold text-indigo-300 uppercase tracking-widest">Galaktik Teknoloji Çağı Başladı</span>
+        </div>
+        <h1 class="text-6xl md:text-8xl font-extrabold mb-8 tracking-tight leading-none">
+            Dijital Evreni <br><span class="gradient-text handwriting">AstralPaws</span> ile Keşfedin.
+        </h1>
+        <p class="text-slate-300 text-lg md:text-xl mb-12 max-w-3xl mx-auto leading-relaxed opacity-90">
+            Masaüstü yazılımlardan web mimarisine, güvenli hosting çözümlerinden SSL sertifikalarına kadar tüm bilişim ihtiyaçlarınız yıldızların altında toplandı.
+        </p>
+    </header>
+
+    <section class="container mx-auto px-6 py-12 relative z-10 reveal">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="glass p-6 rounded-2xl text-center border-t border-white/10 stat-card">
+                <div class="text-3xl font-bold text-white mb-1">%99.9</div>
+                <div class="text-xs text-slate-500 uppercase tracking-widest font-bold">Uptime Oranı</div>
+            </div>
+            <div class="glass p-6 rounded-2xl text-center border-t border-white/10 stat-card">
+                <div class="text-3xl font-bold text-white mb-1">24/7</div>
+                <div class="text-xs text-slate-500 uppercase tracking-widest font-bold">Teknik Destek</div>
+            </div>
+            <div class="glass p-6 rounded-2xl text-center border-t border-white/10 stat-card">
+                <div class="text-3xl font-bold text-white mb-1">Yeni Nesil</div>
+                <div class="text-xs text-slate-500 uppercase tracking-widest font-bold">Yazılım Mimarisi</div>
+            </div>
+            <div class="glass p-6 rounded-2xl text-center border-t border-white/10 stat-card">
+                <div class="text-3xl font-bold text-white mb-1">%100</div>
+                <div class="text-xs text-slate-500 uppercase tracking-widest font-bold">Modern Teknoloji</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="hizmetler" class="container mx-auto px-6 pt-20 pb-20">
+        <div class="text-center mb-40 reveal">
+            <div class="gradient-text font-heading font-bold uppercase tracking-[0.3em] text-7xl mb-32">PEKİ</div>
+            <h2 class="text-3xl md:text-5xl font-bold mb-4 text-white">Neler Sunuyoruz?</h2>
+            <p class="text-slate-400">Fikirlerinizi dijital dünyaya taşıyan uçtan uca çözümler.</p>
+        </div>
+        <div id="hizmetler-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="glass p-8 rounded-3xl group hover:border-indigo-500/80 reveal service-card">
+                <div class="w-12 h-12 bg-indigo-500/10 rounded-xl flex items-center justify-center mb-6 text-indigo-500 group-hover:scale-110 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3 text-white">Masaüstü Uygulamaları</h3>
+                <ul class="text-slate-400 text-sm leading-relaxed space-y-2 list-disc list-inside">
+                    <li>Windows, macOS ve Linux için tam uyumlu native geliştirme.</li>
+                    <li>Yüksek performanslı ve düşük kaynak tüketen yazılım mimarisi.</li>
+                    <li>İhtiyaca özel kullanıcı arayüzü (UI) ve deneyimi (UX) tasarımı.</li>
+                    <li>Veritabanı entegrasyonu ve çevrimdışı çalışma kabiliyeti.</li>
+                </ul>
+            </div>
+            <div class="glass p-8 rounded-3xl group hover:border-purple-500/80 reveal service-card">
+                <div class="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center mb-6 text-purple-500 group-hover:scale-110 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9h18" /></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3 text-white">Modern Web Siteleri</h3>
+                <ul class="text-slate-400 text-sm leading-relaxed space-y-2 list-disc list-inside">
+                    <li>Next.js ve React gibi modern teknolojilerle geliştirilen yapılar.</li>
+                    <li>Mobil uyumlu (Responsive) ve her cihazda kusursuz görünüm.</li>
+                    <li>Gelişmiş SEO optimizasyonu ile arama motorlarında üst sıralar.</li>
+                    <li>Yüksek açılış hızları ve Google Web Vitals uyumluluğu.</li>
+                </ul>
+            </div>
+            <div class="glass p-8 rounded-3xl group hover:border-pink-500/80 reveal service-card">
+                <div class="w-12 h-12 bg-pink-500/10 rounded-xl flex items-center justify-center mb-6 text-pink-500 group-hover:scale-110 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3 text-white">Kişisel Uygulamalar</h3>
+                <ul class="text-slate-400 text-sm leading-relaxed space-y-2 list-disc list-inside">
+                    <li>Bireysel veya kurumsal iş süreçlerinizi kolaylaştıran butik araçlar.</li>
+                    <li>Süreç otomasyonu ve veri yönetim panelleri.</li>
+                    <li>Android ve iOS platformları için hibrit veya native mobil çözümler.</li>
+                    <li>Üçüncü taraf API ve servis entegrasyonları.</li>
+                </ul>
+            </div>
+            <div class="glass p-8 rounded-3xl group hover:border-emerald-500/80 reveal service-card">
+                <div class="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center mb-6 text-emerald-500 group-hover:scale-110 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3 text-white">SSL Sertifikası</h3>
+                <ul class="text-slate-400 text-sm leading-relaxed space-y-2 list-disc list-inside">
+                    <li>256-bit uçtan uca veri şifreleme ile tam güvenlik.</li>
+                    <li>Google "Güvenli" etiketi ile artan marka prestiji.</li>
+                    <li>Kullanıcı verilerinin ve ödeme kanallarının korunması.</li>
+                    <li>Ücretsiz kurulum ve otomatik yenileme takibi.</li>
+                </ul>
+            </div>
+            <div class="glass p-8 rounded-3xl group hover:border-amber-500/80 reveal service-card">
+                <div class="w-12 h-12 bg-amber-500/10 rounded-xl flex items-center justify-center mb-6 text-amber-500 group-hover:scale-110 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" /></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3 text-white">Domain & Hosting</h3>
+                <ul class="text-slate-400 text-sm leading-relaxed space-y-2 list-disc list-inside">
+                    <li>NVMe SSD tabanlı, ultra hızlı sunucu altyapısı.</li>
+                    <li>%99.9 Uptime garantisi ile kesintisiz erişilebilirlik.</li>
+                    <li>Ücretsiz günlük yedekleme ve DDoS koruması.</li>
+                    <li>Kolay kontrol paneli ve anında domain tescili.</li>
+                </ul>
+            </div>
+            <div class="glass p-8 rounded-3xl group hover:border-blue-500/80 reveal service-card">
+                <div class="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center mb-6 text-blue-500 group-hover:scale-110 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3 text-white">Bulut Çözümler</h3>
+                <ul class="text-slate-400 text-sm leading-relaxed space-y-2 list-disc list-inside">
+                    <li>Trafik yoğunluğuna göre anlık ölçeklenebilen yapılar.</li>
+                    <li>Docker ve Kubernetes ile modern konteynerizasyon.</li>
+                    <li>Düşük gecikme süreli global CDN desteği.</li>
+                    <li>Yük dengeleme sistemleri ile maksimum performans.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="hakkimizda" class="container mx-auto px-6 py-20 border-t border-white/5">
+        <div class="grid md:grid-cols-2 gap-16 items-center reveal">
+            <div>
+                <h2 class="text-3xl md:text-5xl font-bold mb-6 text-white leading-tight">Astral Vizyon ile <br><span class="gradient-text">Geleceği İnşa Edin</span></h2>
+                <p class="text-slate-400 mb-8 leading-relaxed text-lg">
+                    AstralPaws olarak sadece kod yazmıyoruz; işletmelerin dijital evrendeki potansiyelini en üst düzeye çıkarıyoruz. Teknoloji dünyasındaki en güncel trendleri, butik bir yaklaşımla iş modelinize entegre ediyoruz. Amacımız, karmaşık teknik süreçleri sizin için basitleştirerek sadece işinize odaklanmanızı sağlamaktır.
+                </p>
+                <ul class="space-y-4">
+                    <li class="flex items-center space-x-3 text-slate-300">
+                        <svg class="w-5 h-5 text-indigo-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                        <span><strong>Yenilikçi Yaklaşım:</strong> En son teknoloji stackleri ile geleceğe hazır projeler.</span>
+                    </li>
+                    <li class="flex items-center space-x-3 text-slate-300">
+                        <svg class="w-5 h-5 text-indigo-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                        <span><strong>Güvenlik Odaklılık:</strong> Verilerinizi korumak için Zero-Trust ve ileri düzey şifreleme.</span>
+                    </li>
+                    <li class="flex items-center space-x-3 text-slate-300">
+                        <svg class="w-5 h-5 text-indigo-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                        <span><strong>Uçtan Uca Destek:</strong> Fikirden yayına ve yayın sonrası bakıma kadar her aşamada yanınızdayız.</span>
+                    </li>
+                    <li class="flex items-center space-x-3 text-slate-300">
+                        <svg class="w-5 h-5 text-indigo-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                        <span><strong>Hız ve Performans:</strong> Kullanıcı deneyimini optimize eden yüksek hızlı altyapılar.</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="relative">
+                <div class="absolute -inset-4 bg-indigo-500/20 blur-3xl rounded-full"></div>
+                <div class="glass p-1 rounded-3xl relative">
+                    <img src="https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&q=80&w=800" alt="Team" class="rounded-2xl opacity-80 group-hover:opacity-100 transition">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="neden-biz" class="container mx-auto px-6 py-20 border-t border-white/5">
+        <div class="text-center mb-16 reveal">
+            <h2 class="text-3xl md:text-5xl font-bold mb-4 text-white">Neden <span class="gradient-text">AstralPaws?</span></h2>
+            <p class="text-slate-400">Sizi dijital evrende öne çıkaran temel değerlerimiz.</p>
+        </div>
+        <div class="grid md:grid-cols-4 gap-6">
+            <div class="glass p-8 rounded-3xl text-center reveal hover:border-indigo-500/50 transition-colors">
+                <div class="text-4xl mb-4">🚀</div>
+                <h3 class="text-lg font-bold text-white mb-2">Işık Hızı</h3>
+                <p class="text-sm text-slate-400">Optimize edilmiş kod ve NVMe altyapısı ile milisaniyeler içinde yüklenen sayfalar.</p>
+            </div>
+            <div class="glass p-8 rounded-3xl text-center reveal hover:border-indigo-500/50 transition-colors">
+                <div class="text-4xl mb-4">🛡️</div>
+                <h3 class="text-lg font-bold text-white mb-2">Tam Güvenlik</h3>
+                <p class="text-sm text-slate-400">Gelişmiş SSL, DDoS koruması ve sürekli izleme ile verileriniz galaktik koruma altında.</p>
+            </div>
+            <div class="glass p-8 rounded-3xl text-center reveal hover:border-indigo-500/50 transition-colors">
+                <div class="text-4xl mb-4">💎</div>
+                <h3 class="text-lg font-bold text-white mb-2">Butik Kalite</h3>
+                <p class="text-sm text-slate-400">Hazır şablonlar yerine, markanızın karakterine özel özgün dijital tasarımlar.</p>
+            </div>
+            <div class="glass p-8 rounded-3xl text-center reveal hover:border-indigo-500/50 transition-colors">
+                <div class="text-4xl mb-4">🎧</div>
+                <h3 class="text-lg font-bold text-white mb-2">7/24 Destek</h3>
+                <p class="text-sm text-slate-400">Sadece mesai saatlerinde değil, yıldızlar parladığı her an teknik ekibimiz yanınızda.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="nasil-calisiyoruz" class="container mx-auto px-6 py-20 border-t border-white/5">
+        <div class="text-center mb-16 reveal">
+            <h2 class="text-3xl md:text-5xl font-bold mb-4 text-white">Nasıl Çalışıyoruz?</h2>
+            <p class="text-slate-400">Fikirden gerçeğe uzanan dört adımlı yol haritamız.</p>
+        </div>
+        <div class="relative">
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 relative">
+                <div class="glass p-8 rounded-3xl reveal relative group">
+                    <div class="absolute -top-4 -left-4 w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/50 group-hover:scale-110 transition">1</div>
+                    <h3 class="text-xl font-bold text-white mb-3">Keşif & Analiz</h3>
+                    <p class="text-slate-400 text-sm">Hedeflerinizi ve sektörünüzü analiz ederek en doğru stratejiyi ekiplerimizle belirliyoruz.</p>
+                </div>
+                <div class="glass p-8 rounded-3xl reveal relative group">
+                    <div class="absolute -top-4 -left-4 w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/50 group-hover:scale-110 transition">2</div>
+                    <h3 class="text-xl font-bold text-white mb-3">Tasarım & Mimari</h3>
+                    <p class="text-slate-400 text-sm">Modern kullanıcı arayüzü ve sağlam bir teknik altyapı tasarımı ile temelleri atıyoruz.</p>
+                </div>
+                <div class="glass p-8 rounded-3xl reveal relative group">
+                    <div class="absolute -top-4 -left-4 w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/50 group-hover:scale-110 transition">3</div>
+                    <h3 class="text-xl font-bold text-white mb-3">Geliştirme</h3>
+                    <p class="text-slate-400 text-sm">Yüksek performanslı teknolojiler kullanarak projenizi satır satır hayata geçiriyoruz.</p>
+                </div>
+                <div class="glass p-8 rounded-3xl reveal relative group">
+                    <div class="absolute -top-4 -left-4 w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/50 group-hover:scale-110 transition">4</div>
+                    <h3 class="text-xl font-bold text-white mb-3">Test & Yayına Alım</h3>
+                    <p class="text-slate-400 text-sm">Sıkı test süreçlerinden sonra projenizi bulut altyapımıza taşıyarak dünyaya açıyoruz.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="sss" class="container mx-auto px-6 py-20 border-t border-white/5">
+        <div class="text-center mb-16 reveal">
+            <h2 class="text-3xl md:text-5xl font-bold mb-4 text-white">Sıkça Sorulan Sorular</h2>
+            <p class="text-slate-400">Merak ettiğiniz konulara hızlı cevaplar.</p>
+        </div>
+        <div class="max-w-3xl mx-auto space-y-4">
+            <div class="glass rounded-2xl overflow-hidden reveal">
+                <button class="w-full px-8 py-6 text-left flex justify-between items-center focus:outline-none group faq-toggle">
+                    <span class="font-bold text-white group-hover:text-indigo-400 transition">Hangi teknolojileri kullanıyorsunuz?</span>
+                    <svg class="w-5 h-5 text-slate-500 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div class="max-h-0 overflow-hidden transition-all duration-300 ease-in-out faq-content">
+                    <div class="px-8 pb-6 text-slate-400 leading-relaxed text-sm">
+                        Web projelerimizde Next.js ve React gibi modern frameworkler kullanırken, masaüstü çözümlerinde yüksek performanslı native teknolojileri tercih ediyoruz. Altyapımızda ise NVMe SSD destekli bulut sunucular yer almaktadır.
+                    </div>
+                </div>
+            </div>
+            <div class="glass rounded-2xl overflow-hidden reveal">
+                <button class="w-full px-8 py-6 text-left flex justify-between items-center focus:outline-none group faq-toggle">
+                    <span class="font-bold text-white group-hover:text-indigo-400 transition">Satış sonrası teknik destek sağlıyor musunuz?</span>
+                    <svg class="w-5 h-5 text-slate-500 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div class="max-h-0 overflow-hidden transition-all duration-300 ease-in-out faq-content">
+                    <div class="px-8 pb-6 text-slate-400 leading-relaxed text-sm">
+                        Evet, teslim ettiğimiz tüm projeler için 7/24 teknik destek ve bakım hizmeti sunuyoruz. Herhangi bir sorun yaşamanız durumunda galaktik hızda müdahale ediyoruz.
+                    </div>
+                </div>
+            </div>
+            <div class="glass rounded-2xl overflow-hidden reveal">
+                <button class="w-full px-8 py-6 text-left flex justify-between items-center focus:outline-none group faq-toggle">
+                    <span class="font-bold text-white group-hover:text-indigo-400 transition">Mevcut web sitemi AstralPaws'a taşıyabilir miyim?</span>
+                    <svg class="w-5 h-5 text-slate-500 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div class="max-h-0 overflow-hidden transition-all duration-300 ease-in-out faq-content">
+                    <div class="px-8 pb-6 text-slate-400 leading-relaxed text-sm">
+                        Tabii ki. Domain ve hosting taşıma işlemlerini hiçbir veri kaybı yaşamadan ve siteniz kapanmadan profesyonel ekibimizle gerçekleştiriyoruz.
+                    </div>
+                </div>
+            </div>
+            <div class="glass rounded-2xl overflow-hidden reveal">
+                <button class="w-full px-8 py-6 text-left flex justify-between items-center focus:outline-none group faq-toggle">
+                    <span class="font-bold text-white group-hover:text-indigo-400 transition">SSL sertifikası kurulumu yapıyor musunuz?</span>
+                    <svg class="w-5 h-5 text-slate-500 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div class="max-h-0 overflow-hidden transition-all duration-300 ease-in-out faq-content">
+                    <div class="px-8 pb-6 text-slate-400 leading-relaxed text-sm">
+                        Tüm hosting paketlerimizde ve web projelerimizde SSL sertifikasını ücretsiz olarak kuruyor ve otomatik yenileme takibini yapıyoruz.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="iletisim" class="container mx-auto px-6 py-20 border-t border-white/5">
+        <div class="glass rounded-[3rem] p-8 md:p-16 overflow-hidden relative reveal">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-600/10 blur-[100px] -z-10"></div>
+            <div class="grid md:grid-cols-2 gap-12">
+                <div>
+                    <h2 class="text-4xl font-bold mb-6 text-white leading-tight">Projenizi <br><span class="text-indigo-500">Konuşalım mı?</span></h2>
+                    <p class="text-slate-400 mb-8">Hayalinizdeki projeyi anlatın, teknik detayları biz halledelim.</p>
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-4 text-slate-300">
+                            <div class="w-10 h-10 glass rounded-lg flex items-center justify-center text-indigo-500">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                            </div>
+                            <span>contact@example.com</span>
+                        </div>
+                    </div>
+                </div>
+                <form class="space-y-4" id="contactForm">
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <input type="text" id="name" name="name" placeholder="Adınız" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition" required>
+                        <input type="email" id="email" name="email" placeholder="E-posta Adresiniz" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition" required>
+                        <input type="tel" id="phone" name="phone" placeholder="Telefon Numaranız" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition" required>
+                    </div>
+                    <select id="service" name="service" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-slate-400 focus:outline-none focus:border-indigo-500 transition" required>
+                        <option value="">Hizmet Seçin</option>
+                        <option value="Web Sitesi">Web Sitesi</option>
+                        <option value="Masaüstü Uygulama">Masaüstü Uygulama</option>
+                        <option value="Hosting & Domain">Hosting & Domain</option>
+                        <option value="Diğer">Diğer</option>
+                    </select>
+                    <textarea id="message" name="message" rows="4" placeholder="Mesajınız" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition" required></textarea>
+                    <button type="submit" class="w-full bg-white text-slate-950 font-bold py-4 rounded-xl hover:bg-slate-200 transition">Gönder</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer class="border-t border-white/5 py-12">
+        <div class="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 text-center md:text-left">
+            <div class="text-xl font-bold">Astral<span class="text-indigo-500">Paws</span></div>
+            <p class="text-slate-500 text-sm font-medium">© 2025 AstralPaws Global Technologies. Tüm hakları saklıdır.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('mousedown', (e) => {
+            const baseRotation = Math.random() * 360; 
+            const colors = ['#818cf8', '#c084fc', '#f472b6']; 
+            const travelDistance = 45; 
+            
+            for (let i = 0; i < 4; i++) {
+                const line = document.createElement('div');
+                line.className = 'click-line';
+                line.style.left = `${e.clientX}px`;
+                line.style.top = `${e.clientY}px`;
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                line.style.background = color;
+                line.style.boxShadow = `0 0 15px ${color}`;
+                
+                const angle = baseRotation + (i * 90); 
+                
+                line.style.transform = `translate(-50%, -50%) rotate(${angle}deg) translateX(0) scaleX(0)`;
+                document.body.appendChild(line);
+                
+                requestAnimationFrame(() => {
+                    line.style.transform = `translate(-50%, -50%) rotate(${angle}deg) translateX(${travelDistance}px) scaleX(1)`;
+                    line.style.opacity = '0';
+                });
+                
+                setTimeout(() => line.remove(), 700);
+            }
+        });
+
+        function createShootingStar() {
+            const star = document.createElement('div');
+            star.className = 'shooting-star';
+            
+            const angle = (Math.random() * 360) + 'deg';
+            const duration = (Math.random() * 1 + 1) + 's';
+            const scale = Math.random() * 0.8 + 0.5;
+
+            star.style.setProperty('--angle', angle);
+            star.style.transform = `scale(${scale})`;
+            star.style.animation = `shoot ${duration} ease-in forwards`;
+
+            star.style.top = (Math.random() * 100) + 'vh';
+            star.style.left = (Math.random() * 100) + 'vw';
+            
+            document.body.appendChild(star);
+            setTimeout(() => star.remove(), 3500);
+        }
+
+        setInterval(() => {
+            if (Math.random() > 0.5) createShootingStar();
+        }, 1500);
+
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const parent = entry.target.parentElement;
+                    if (parent && (parent.classList.contains('grid') || parent.tagName === 'DIV')) {
+                        const siblings = Array.from(parent.querySelectorAll('.reveal'));
+                        const index = siblings.indexOf(entry.target);
+                        if (index !== -1) {
+                            entry.target.style.transitionDelay = `${index * 0.1}s`;
+                        }
+                    }
+                    
+                    setTimeout(() => {
+                        entry.target.classList.add('active');
+                    }, 50);
+                }
+            });
+        }, {
+            threshold: 0.1
+        });
+
+        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+        let lastX = 0;
+        let lastY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            const dist = Math.hypot(e.clientX - lastX, e.clientY - lastY);
+            if (dist > 15) {
+                createCursorStar(e.clientX, e.clientY);
+                lastX = e.clientX;
+                lastY = e.clientY;
+            }
+        });
+
+        function createCursorStar(x, y) {
+            const star = document.createElement('div');
+            star.className = 'cursor-star';
+
+            const colors = ['#818cf8', '#6366f1', '#a855f7', '#c084fc'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            star.style.background = color;
+            star.style.boxShadow = `0 0 10px ${color}`;
+
+            const size = Math.random() * 3 + 2;
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+            star.style.left = `${x}px`;
+            star.style.top = `${y}px`;
+            
+            star.style.setProperty('--dx', `${(Math.random() - 0.5) * 30}px`);
+            star.style.setProperty('--dy', `${(Math.random() - 0.5) * 30}px`);
+
+            document.body.appendChild(star);
+            setTimeout(() => star.remove(), 800);
+        }
+
+        const serviceCards = document.querySelectorAll('.service-card');
+        const serviceGrid = document.getElementById('hizmetler-grid');
+        const focusBackdrop = document.getElementById('focus-backdrop');
+
+        const handleTilt = (e) => {
+            const card = e.currentTarget;
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const rotateX = ((y - centerY) / centerY) * -7;
+            const rotateY = ((x - centerX) / centerX) * 7;
+            
+            card.style.transform = `perspective(1000px) translate(-50%, -50%) scale(1.1) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        };
+
+        const resetTilt = (e) => {
+            e.currentTarget.style.transform = `perspective(1000px) translate(-50%, -50%) scale(1.1)`;
+        };
+
+        serviceCards.forEach(card => {
+            card.addEventListener('click', () => {
+                if (card.classList.contains('service-card-active')) return;
+                
+                serviceGrid.classList.add('grid-focus-mode');
+                card.classList.add('service-card-active');
+                focusBackdrop.classList.add('active');
+                document.body.style.overflow = 'hidden';
+
+                card.addEventListener('mousemove', handleTilt);
+                card.addEventListener('mouseleave', resetTilt);
+            });
+        });
+
+        const closeFocus = () => {
+            const activeCard = document.querySelector('.service-card-active');
+            if (activeCard) {
+                activeCard.removeEventListener('mousemove', handleTilt);
+                activeCard.removeEventListener('mouseleave', resetTilt);
+                activeCard.style.transform = '';
+            }
+            serviceGrid.classList.remove('grid-focus-mode');
+            serviceCards.forEach(c => c.classList.remove('service-card-active'));
+            focusBackdrop.classList.remove('active');
+            document.body.style.overflow = '';
+        };
+
+        focusBackdrop.addEventListener('click', closeFocus);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeFocus();
+        });
+
+        const updateScroll = () => {
+            document.body.style.setProperty('--scroll-y', window.scrollY);
+        };
+        window.addEventListener('scroll', updateScroll, { passive: true });
+        updateScroll();
+
+        document.querySelectorAll('.faq-toggle').forEach(button => {
+            button.addEventListener('click', () => {
+                const content = button.nextElementSibling;
+                const icon = button.querySelector('svg');
+                
+                if (content.style.maxHeight && content.style.maxHeight !== '0px') {
+                    content.style.maxHeight = '0px';
+                    icon.style.transform = 'rotate(0deg)';
+                } else {
+                    document.querySelectorAll('.faq-content').forEach(c => c.style.maxHeight = '0px');
+                    document.querySelectorAll('.faq-toggle svg').forEach(i => i.style.transform = 'rotate(0deg)');
+                    
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                    icon.style.transform = 'rotate(180deg)';
+                }
+            });
+        });
+
+        document.querySelectorAll('.stat-card').forEach((card) => {
+            card.addEventListener('click', () => {
+                if (card.classList.contains('shattered-hide') || card.classList.contains('reappear')) return;
+
+                const rect = card.getBoundingClientRect();
+                const shardCount = 25;
+                const colors = ['#818cf8', '#c084fc', '#f472b6', '#ffffff'];
+                
+                for (let i = 0; i < shardCount; i++) {
+                    const shard = document.createElement('div');
+                    shard.className = 'shard';
+                    
+                    const size = Math.random() * 10 + 4;
+                    shard.style.width = `${size}px`;
+                    shard.style.height = `${size}px`;
+                    shard.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    shard.style.left = `${rect.left + rect.width / 2}px`;
+                    shard.style.top = `${rect.top + rect.height / 2}px`;
+                    shard.style.borderRadius = Math.random() > 0.5 ? '2px' : '50%';
+
+                    const angle = Math.random() * Math.PI * 2;
+                    const velocity = 100 + Math.random() * 300;
+                    const tx = Math.cos(angle) * velocity;
+                    const ty = Math.sin(angle) * velocity;
+                    const rot = Math.random() * 720;
+
+                    document.body.appendChild(shard);
+
+                    shard.animate([
+                        { transform: 'translate(-50%, -50%) scale(1) rotate(0deg)', opacity: 1 },
+                        { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0) rotate(${rot}deg)`, opacity: 0 }
+                    ], {
+                        duration: 1000 + Math.random() * 500,
+                        easing: 'cubic-bezier(0.1, 0.8, 0.3, 1)',
+                        fill: 'forwards'
+                    });
+
+                    setTimeout(() => shard.remove(), 1500);
+                }
+
+                card.classList.add('shattered-hide');
+                
+                setTimeout(() => {
+                    card.classList.remove('shattered-hide');
+                    card.classList.add('reappear');
+                    
+                    setTimeout(() => {
+                        card.classList.remove('reappear');
+                    }, 600);
+                }, 5500);
+            });
+        });
+
+        let isGravityOn = false;
+        const triggerGravity = () => {
+            if (isGravityOn) return;
+            isGravityOn = true;
+
+            document.body.classList.add('shake-active');
+
+            setTimeout(() => {
+                document.body.classList.remove('shake-active');
+                
+                const targets = document.querySelectorAll('header, section, footer, .reveal');
+                targets.forEach(el => {
+                    const rot = (Math.random() - 0.5) * 80; 
+                    el.style.setProperty('--fall-rot', `${rot}deg`);
+                    el.classList.add('gravity-animate');
+
+                    requestAnimationFrame(() => {
+                        el.classList.add('gravity-fell');
+                    });
+                });
+
+                setTimeout(() => {
+                    targets.forEach(el => {
+                        el.classList.remove('gravity-fell');
+                    });
+
+                    setTimeout(() => {
+                        targets.forEach(el => el.classList.remove('gravity-animate'));
+                        isGravityOn = false;
+                    }, 1800);
+                }, 6000);
+            }, 600);
+        };
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === 'g') triggerGravity();
+        });
+
+        if (window.DeviceMotionEvent) {
+            window.addEventListener('devicemotion', (e) => {
+                const acc = e.accelerationIncludingGravity;
+                if (!acc) return;
+                const totalAcc = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
+                if (totalAcc > 35) triggerGravity(); 
+            });
+        }
+
+        let lastWinX = window.screenX;
+        let lastWinY = window.screenY;
+        let shakeTimer = 0; 
+
+        setInterval(() => {
+            const moveX = Math.abs(window.screenX - lastWinX);
+            const moveY = Math.abs(window.screenY - lastWinY);
+            const totalMovement = moveX + moveY;
+
+            if (totalMovement > 50) {
+                shakeTimer += 100;
+                if (shakeTimer >= 1500) {
+                    triggerGravity();
+                    shakeTimer = 0; 
+                }
+            } else {
+                shakeTimer = 0;
+            }
+            
+            lastWinX = window.screenX;
+            lastWinY = window.screenY;
+        }, 100);
+
+        const contactForm = document.getElementById('contactForm');
+
+        if (contactForm) {
+            contactForm.addEventListener('submit', async (e) => {
+                e.preventDefault(); 
+
+                const name = document.getElementById('name').value;
+                const email = document.getElementById('email').value;
+                const phone = document.getElementById('phone').value;
+                const service = document.getElementById('service').value;
+                const message = document.getElementById('message').value;
+
+                const submitButton = contactForm.querySelector('button[type="submit"]');
+                submitButton.disabled = true; 
+                submitButton.textContent = 'Gönderiliyor...'; 
+
+                try {
+                    const response = await fetch('http://127.0.0.1:5000/send-email', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ name, email, phone, service, message }),
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        alert('Mesajınız başarıyla gönderildi!');
+                        contactForm.reset(); // Formu temizle
+                    } else {
+                        alert(`Mesaj gönderilemedi: ${result.error || 'Bilinmeyen bir hata oluştu.'}`);
+                    }
+                } catch (error) {
+                    console.error('Form gönderme hatası:', error);
+                    alert('Mesaj gönderilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
+                } finally {
+                    submitButton.disabled = false; // Butonu tekrar etkinleştir
+                    submitButton.textContent = 'Gönder'; // Buton metnini eski haline getir
+                }
+            });
+        }
+    </script>
+</body>
+</html>
